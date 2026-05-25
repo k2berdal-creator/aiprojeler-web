@@ -2,8 +2,8 @@ import { motion } from 'framer-motion';
 
 function WhatsAppButton() {
   // WhatsApp numaranızı buraya yazın (Örn: 905551234567)
-  const phoneNumber = "905555555555"; 
-  const message = "Merhaba, projeniz hakkında bilgi almak istiyorum.";
+  const phoneNumber = "905366632474"; 
+  const message = "Merhaba, yazılımlarınız ve lisanslama hakkında bilgi almak istiyorum.";
 
   const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
 
