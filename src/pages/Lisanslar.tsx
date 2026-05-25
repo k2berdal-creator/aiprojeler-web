@@ -13,8 +13,14 @@ interface Lisans {
   status: string;
 }
 
+interface BayiOption {
+  id: string;
+  name: string;
+}
+
 function Lisanslar() {
   const [lisanslar, setLisanslar] = useState<Lisans[]>([]);
+  const [bayiler, setBayiler] = useState<BayiOption[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   
   // Form State
@@ -24,14 +30,28 @@ function Lisanslar() {
   const [newExpiry, setNewExpiry] = useState('');
 
   useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, 'lisanslar'), (snapshot) => {
+    // Lisansları getir
+    const unsubscribeLisanslar = onSnapshot(collection(db, 'lisanslar'), (snapshot) => {
       const lisanslarData = snapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       })) as Lisans[];
       setLisanslar(lisanslarData);
     });
-    return () => unsubscribe();
+
+    // Bayileri getir (Dropdown için)
+    const unsubscribeBayiler = onSnapshot(collection(db, 'bayiler'), (snapshot) => {
+      const bayilerData = snapshot.docs.map(doc => ({
+        id: doc.id,
+        name: doc.data().name
+      })) as BayiOption[];
+      setBayiler(bayilerData);
+    });
+
+    return () => {
+      unsubscribeLisanslar();
+      unsubscribeBayiler();
+    };
   }, []);
 
   const handleAddLisans = async (e: React.FormEvent) => {
@@ -41,7 +61,7 @@ function Lisanslar() {
     try {
       await addDoc(collection(db, 'lisanslar'), {
         software: newSoftware,
-        dealer: newDealer,
+        dealer: newDealer, // Seçilen bayinin adı buraya kaydedilecek
         expiry: newExpiry,
         status: 'Aktif',
         createdAt: serverTimestamp()
@@ -96,10 +116,22 @@ function Lisanslar() {
               <label style={{ fontSize: '0.875rem', marginBottom: '0.25rem', display: 'block' }}>Yazılım Adı</label>
               <input type="text" value={newSoftware} onChange={e => setNewSoftware(e.target.value)} style={{ width: '100%', padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #e2e8f0' }} required />
             </div>
+            
             <div style={{ flex: 1, minWidth: '150px' }}>
-              <label style={{ fontSize: '0.875rem', marginBottom: '0.25rem', display: 'block' }}>Bayi / Müşteri</label>
-              <input type="text" value={newDealer} onChange={e => setNewDealer(e.target.value)} style={{ width: '100%', padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #e2e8f0' }} required />
+              <label style={{ fontSize: '0.875rem', marginBottom: '0.25rem', display: 'block' }}>Bayi / Müşteri Seçin</label>
+              <select 
+                value={newDealer} 
+                onChange={e => setNewDealer(e.target.value)} 
+                style={{ width: '100%', padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #e2e8f0', backgroundColor: '#fff' }} 
+                required
+              >
+                <option value="" disabled>Lütfen bir bayi seçin</option>
+                {bayiler.map(bayi => (
+                  <option key={bayi.id} value={bayi.name}>{bayi.name}</option>
+                ))}
+              </select>
             </div>
+
             <div style={{ flex: 1, minWidth: '150px' }}>
               <label style={{ fontSize: '0.875rem', marginBottom: '0.25rem', display: 'block' }}>Bitiş Tarihi</label>
               <input type="date" value={newExpiry} onChange={e => setNewExpiry(e.target.value)} style={{ width: '100%', padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #e2e8f0' }} required />
