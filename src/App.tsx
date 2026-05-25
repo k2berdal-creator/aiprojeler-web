@@ -3,6 +3,7 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import AdminLayout from './pages/AdminLayout';
 import Dashboard from './pages/Dashboard';
+import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
   return (
@@ -12,10 +13,12 @@ function App() {
         <Route path="/login" element={<Login />} />
         
         {/* Admin Rotaları */}
-        <Route path="/admin" element={<AdminLayout />}>
-          <Route index element={<Dashboard />} />
-          <Route path="bayiler" element={<Dashboard />} />
-          <Route path="lisanslar" element={<Dashboard />} />
+        <Route element={<ProtectedRoute />}>
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<Dashboard />} />
+            <Route path="bayiler" element={<Dashboard />} />
+            <Route path="lisanslar" element={<Dashboard />} />
+          </Route>
         </Route>
       </Routes>
     </BrowserRouter>

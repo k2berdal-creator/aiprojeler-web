@@ -2,32 +2,53 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Bot, Lock, Mail, ArrowRight, ShieldCheck } from 'lucide-react';
+import { auth } from '../firebase';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 import '../index.css';
 
 function Login() {
-  const [email, setEmail] = useState('admin@aiprojeler.com');
-  const [password, setPassword] = useState('123456');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [step, setStep] = useState<'login' | '2fa'>('login');
   const [mfaCode, setMfaCode] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   
   const navigate = useNavigate();
 
-  const handleLoginSubmit = (e: React.FormEvent) => {
+  const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email && password) {
-      // Birinci aşama başarılı, 2FA ekranına geç
-      setStep('2fa');
-      setError('');
-    } else {
+    if (!email || !password) {
       setError('Lütfen e-posta ve şifrenizi girin.');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+    
+    try {
+      // Firebase Authentication ile giriş yap
+      await signInWithEmailAndPassword(auth, email, password);
+      
+      // Giriş başarılıysa 2FA adımına geç
+      setStep('2fa');
+    } catch (err: any) {
+      console.error(err);
+      if (err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password') {
+        setError('E-posta veya şifre hatalı!');
+      } else {
+        setError('Giriş yapılırken bir hata oluştu: ' + err.message);
+      }
+    } finally {
+      setLoading(false);
     }
   };
 
   const handle2FASubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    // NOT: Gerçek SMS tabanlı 2FA için Firebase Identity Platform (ücretli plan) gerekir.
+    // Şimdilik ücretsiz sürümde olduğumuz için görsel güvenlik adımı olarak 6 haneli kod kontrolü yapıyoruz.
     if (mfaCode.length === 6) {
-      // 2FA başarılı, admin paneline yönlendir
       navigate('/admin');
     } else {
       setError('Lütfen 6 haneli doğrulama kodunu girin.');
@@ -57,7 +78,7 @@ function Login() {
           <p style={{ color: 'var(--text-muted)' }}>
             {step === 'login' 
               ? 'Yönetim paneline erişmek için giriş yapın.' 
-              : 'Telefonunuza (veya Authenticator) gelen 6 haneli kodu girin.'}
+              : 'Güvenlik için 6 haneli doğrulama kodunu girin.'}
           </p>
         </div>
 
@@ -85,7 +106,7 @@ function Login() {
                     type="email" 
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="admin@aiprojeler.com"
+                    placeholder="admin@sirket.com"
                     style={{ width: '100%', padding: '0.75rem 1rem 0.75rem 2.75rem', borderRadius: '0.75rem', border: '1px solid var(--glass-border)', background: 'rgba(255,255,255,0.5)', outline: 'none' }}
                   />
                 </div>
@@ -105,8 +126,8 @@ function Login() {
                 </div>
               </div>
 
-              <button className="btn-primary" type="submit" style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', marginTop: '1rem' }}>
-                Devam Et <ArrowRight size={18} />
+              <button className="btn-primary" type="submit" disabled={loading} style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', marginTop: '1rem', opacity: loading ? 0.7 : 1 }}>
+                {loading ? 'Giriş Yapılıyor...' : 'Devam Et'} <ArrowRight size={18} />
               </button>
             </motion.form>
           ) : (
