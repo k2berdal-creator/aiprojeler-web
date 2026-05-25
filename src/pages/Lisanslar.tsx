@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Search, Plus, CheckCircle2, XCircle, Key } from 'lucide-react';
+import { Search, Plus, CheckCircle2, XCircle, Key, MonitorSmartphone } from 'lucide-react';
 import { collection, onSnapshot, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
 import '../index.css';
@@ -11,6 +11,7 @@ interface Lisans {
   licenseKey: string;
   dealer: string;
   userLimit: number;
+  deviceLimit: number;
   price: string;
   isLifetime: boolean;
   status: string;
@@ -84,6 +85,7 @@ function Lisanslar() {
         licenseKey: newLicenseKey,
         dealer: newDealer,
         userLimit: Number(newUserLimit) || 0,
+        deviceLimit: 1, // Sistem kuralları gereği lisans tek bir donanıma aittir
         price: newPrice,
         isLifetime: true,
         status: 'Aktif',
@@ -136,7 +138,7 @@ function Lisanslar() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             onSubmit={handleAddLisans}
-            style={{ padding: '1.5rem', background: '#f8fafc', borderRadius: '0.75rem', marginBottom: '1.5rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem', alignItems: 'flex-start', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}
+            style={{ padding: '1.5rem', background: '#f8fafc', borderRadius: '0.75rem', marginBottom: '1.5rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem', alignItems: 'flex-start', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}
           >
             <div>
               <label style={{ fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.5rem', display: 'block' }}>Yazılım Adı</label>
@@ -159,13 +161,20 @@ function Lisanslar() {
             </div>
 
             <div>
+              <label style={{ fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.5rem', display: 'block' }}>Kurulum İzni</label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1rem', background: '#e0e7ff', border: '1px solid #c7d2fe', borderRadius: '0.5rem', color: '#4338ca', fontSize: '0.9rem', fontWeight: 600 }}>
+                <MonitorSmartphone size={18} /> Sadece Tek Cihaz
+              </div>
+            </div>
+
+            <div>
               <label style={{ fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.5rem', display: 'block' }}>Kullanıcı Limiti</label>
-              <input type="number" className="form-input" placeholder="Örn: 50" value={newUserLimit} onChange={e => setNewUserLimit(e.target.value)} required min="1" />
+              <input type="number" className="form-input" placeholder="Örn: 50" value={newUserLimit} onChange={e => setNewUserLimit(e.target.value)} min="0" />
             </div>
 
             <div>
               <label style={{ fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.5rem', display: 'block' }}>Tutar / Fiyat</label>
-              <input type="text" className="form-input" placeholder="Örn: 15.000 ₺" value={newPrice} onChange={e => setNewPrice(e.target.value)} required />
+              <input type="text" className="form-input" placeholder="Örn: 15.000 ₺" value={newPrice} onChange={e => setNewPrice(e.target.value)} />
             </div>
 
             <div style={{ gridColumn: '1 / -1' }}>
@@ -190,7 +199,7 @@ function Lisanslar() {
               <tr style={{ borderBottom: '1px solid #e2e8f0', color: '#64748b', fontSize: '0.875rem' }}>
                 <th style={{ padding: '1rem' }}>Yazılım & Bayi</th>
                 <th style={{ padding: '1rem' }}>Lisans Anahtarı</th>
-                <th style={{ padding: '1rem' }}>Sınır</th>
+                <th style={{ padding: '1rem' }}>Kurulum & Kullanıcı</th>
                 <th style={{ padding: '1rem' }}>Süre</th>
                 <th style={{ padding: '1rem' }}>Tutar</th>
                 <th style={{ padding: '1rem' }}>Durum</th>
@@ -207,7 +216,10 @@ function Lisanslar() {
                       <div style={{ fontSize: '0.85rem', color: '#64748b' }}>{lisans.dealer}</div>
                     </td>
                     <td style={{ padding: '1rem', color: '#0ea5e9', fontFamily: 'monospace', fontWeight: 600, fontSize: '0.9rem' }}>{lisans.licenseKey || '-'}</td>
-                    <td style={{ padding: '1rem', color: '#64748b', fontWeight: 500 }}>{lisans.userLimit ? `${lisans.userLimit} Kullanıcı` : 'Sınırsız'}</td>
+                    <td style={{ padding: '1rem' }}>
+                      <div style={{ fontWeight: 600, color: '#3b82f6', fontSize: '0.85rem' }}>Tek Cihaz (HWID)</div>
+                      <div style={{ color: '#64748b', fontSize: '0.85rem' }}>{lisans.userLimit ? `${lisans.userLimit} Kullanıcı` : 'Sınırsız Kullanıcı'}</div>
+                    </td>
                     <td style={{ padding: '1rem' }}>
                       <span style={{ padding: '0.25rem 0.5rem', background: '#f1f5f9', color: '#475569', borderRadius: '0.25rem', fontSize: '0.75rem', fontWeight: 600 }}>Ömür Boyu</span>
                     </td>
