@@ -6,10 +6,12 @@ import Dashboard from './pages/Dashboard';
 import Bayiler from './pages/Bayiler';
 import Lisanslar from './pages/Lisanslar';
 import ProtectedRoute from './components/ProtectedRoute';
+import WhatsAppButton from './components/WhatsAppButton';
 
 function App() {
   return (
     <BrowserRouter>
+      <WhatsAppButton />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
