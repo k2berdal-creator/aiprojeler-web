@@ -10,7 +10,6 @@ interface Lisans {
   software: string;
   licenseKey: string;
   dealer: string;
-  hwid: string;
   userLimit: number;
   price: string;
   isLifetime: boolean;
@@ -31,7 +30,6 @@ function Lisanslar() {
   const [showAddLisans, setShowAddLisans] = useState(false);
   const [newSoftware, setNewSoftware] = useState('');
   const [newDealer, setNewDealer] = useState('');
-  const [newHWID, setNewHWID] = useState('');
   const [newUserLimit, setNewUserLimit] = useState('');
   const [newPrice, setNewPrice] = useState('');
   const [newLicenseKey, setNewLicenseKey] = useState('');
@@ -60,17 +58,23 @@ function Lisanslar() {
   }, []);
 
   const generateLicenseKey = () => {
-    const randomPart = Math.random().toString(36).substring(2, 6).toUpperCase();
-    const hwidPart = newHWID ? newHWID.replace(/[^a-zA-Z0-9]/g, '').substring(0, 4).toUpperCase() : 'SRVR';
-    const timePart = Date.now().toString(36).substring(4).toUpperCase();
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const generateSegment = (length: number) => {
+      let segment = '';
+      for (let i = 0; i < length; i++) {
+        segment += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      return segment;
+    };
     
-    setNewLicenseKey(`K2B-${randomPart}-${hwidPart}-${timePart}`);
+    // Yüksek güvenlikli ve benzersiz 25 karakterlik Lisans Anahtarı üretimi
+    setNewLicenseKey(`K2B-${generateSegment(5)}-${generateSegment(5)}-${generateSegment(5)}-${generateSegment(5)}`);
   };
 
   const handleAddLisans = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newSoftware || !newDealer || !newLicenseKey || !newHWID) {
-      alert("Lütfen Yazılım, Bayi, HWID ve Lisans Anahtarı alanlarını doldurun.");
+    if (!newSoftware || !newDealer || !newLicenseKey) {
+      alert("Lütfen Yazılım, Bayi ve Lisans Anahtarı alanlarını doldurun.");
       return;
     }
     
@@ -79,7 +83,6 @@ function Lisanslar() {
         software: newSoftware,
         licenseKey: newLicenseKey,
         dealer: newDealer,
-        hwid: newHWID,
         userLimit: Number(newUserLimit) || 0,
         price: newPrice,
         isLifetime: true,
@@ -90,7 +93,6 @@ function Lisanslar() {
       setNewSoftware('');
       setNewLicenseKey('');
       setNewDealer('');
-      setNewHWID('');
       setNewUserLimit('');
       setNewPrice('');
     } catch (error) {
@@ -157,11 +159,6 @@ function Lisanslar() {
             </div>
 
             <div>
-              <label style={{ fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.5rem', display: 'block' }}>Sunucu Donanım Kimliği (HWID)</label>
-              <input type="text" className="form-input" placeholder="Örn: 5F3B-9A2C-..." value={newHWID} onChange={e => setNewHWID(e.target.value)} style={{ fontFamily: 'monospace' }} required />
-            </div>
-
-            <div>
               <label style={{ fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.5rem', display: 'block' }}>Kullanıcı Limiti</label>
               <input type="number" className="form-input" placeholder="Örn: 50" value={newUserLimit} onChange={e => setNewUserLimit(e.target.value)} required min="1" />
             </div>
@@ -194,7 +191,6 @@ function Lisanslar() {
                 <th style={{ padding: '1rem' }}>Yazılım & Bayi</th>
                 <th style={{ padding: '1rem' }}>Lisans Anahtarı</th>
                 <th style={{ padding: '1rem' }}>Sınır</th>
-                <th style={{ padding: '1rem' }}>HWID</th>
                 <th style={{ padding: '1rem' }}>Süre</th>
                 <th style={{ padding: '1rem' }}>Tutar</th>
                 <th style={{ padding: '1rem' }}>Durum</th>
@@ -202,7 +198,7 @@ function Lisanslar() {
             </thead>
             <tbody>
               {filteredLisanslar.length === 0 ? (
-                <tr><td colSpan={7} style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>Listelenecek lisans bulunamadı.</td></tr>
+                <tr><td colSpan={6} style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>Listelenecek lisans bulunamadı.</td></tr>
               ) : (
                 filteredLisanslar.map((lisans) => (
                   <tr key={lisans.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
@@ -212,7 +208,6 @@ function Lisanslar() {
                     </td>
                     <td style={{ padding: '1rem', color: '#0ea5e9', fontFamily: 'monospace', fontWeight: 600, fontSize: '0.9rem' }}>{lisans.licenseKey || '-'}</td>
                     <td style={{ padding: '1rem', color: '#64748b', fontWeight: 500 }}>{lisans.userLimit ? `${lisans.userLimit} Kullanıcı` : 'Sınırsız'}</td>
-                    <td style={{ padding: '1rem', color: '#64748b', fontFamily: 'monospace', fontSize: '0.85rem' }}>{lisans.hwid || '-'}</td>
                     <td style={{ padding: '1rem' }}>
                       <span style={{ padding: '0.25rem 0.5rem', background: '#f1f5f9', color: '#475569', borderRadius: '0.25rem', fontSize: '0.75rem', fontWeight: 600 }}>Ömür Boyu</span>
                     </td>
