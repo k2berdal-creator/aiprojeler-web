@@ -8,6 +8,7 @@ import '../index.css';
 interface Lisans {
   id: string;
   software: string;
+  licenseKey: string;
   dealer: string;
   expiry: string;
   status: string;
@@ -26,11 +27,11 @@ function Lisanslar() {
   // Form State
   const [showAddLisans, setShowAddLisans] = useState(false);
   const [newSoftware, setNewSoftware] = useState('');
+  const [newLicenseKey, setNewLicenseKey] = useState('');
   const [newDealer, setNewDealer] = useState('');
   const [newExpiry, setNewExpiry] = useState('');
 
   useEffect(() => {
-    // Lisansları getir
     const unsubscribeLisanslar = onSnapshot(collection(db, 'lisanslar'), (snapshot) => {
       const lisanslarData = snapshot.docs.map(doc => ({
         id: doc.id,
@@ -39,7 +40,6 @@ function Lisanslar() {
       setLisanslar(lisanslarData);
     });
 
-    // Bayileri getir (Dropdown için)
     const unsubscribeBayiler = onSnapshot(collection(db, 'bayiler'), (snapshot) => {
       const bayilerData = snapshot.docs.map(doc => ({
         id: doc.id,
@@ -61,13 +61,15 @@ function Lisanslar() {
     try {
       await addDoc(collection(db, 'lisanslar'), {
         software: newSoftware,
-        dealer: newDealer, // Seçilen bayinin adı buraya kaydedilecek
+        licenseKey: newLicenseKey,
+        dealer: newDealer,
         expiry: newExpiry,
         status: 'Aktif',
         createdAt: serverTimestamp()
       });
       setShowAddLisans(false);
       setNewSoftware('');
+      setNewLicenseKey('');
       setNewDealer('');
       setNewExpiry('');
     } catch (error) {
@@ -78,7 +80,8 @@ function Lisanslar() {
 
   const filteredLisanslar = lisanslar.filter(l => 
     l.software.toLowerCase().includes(searchTerm.toLowerCase()) || 
-    l.dealer.toLowerCase().includes(searchTerm.toLowerCase())
+    l.dealer.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (l.licenseKey && l.licenseKey.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   return (
@@ -94,7 +97,7 @@ function Lisanslar() {
             <Search size={16} color="#94a3b8" style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)' }} />
             <input 
               type="text" 
-              placeholder="Yazılım veya Bayi Ara..." 
+              placeholder="Yazılım, Bayi veya Anahtar Ara..." 
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
               style={{ width: '100%', padding: '0.5rem 1rem 0.5rem 2.5rem', borderRadius: '0.5rem', border: '1px solid #e2e8f0', outline: 'none' }} 
@@ -110,14 +113,19 @@ function Lisanslar() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             onSubmit={handleAddLisans}
-            style={{ padding: '1rem', background: '#f8fafc', borderRadius: '0.5rem', marginBottom: '1.5rem', display: 'flex', gap: '1rem', alignItems: 'flex-end', flexWrap: 'wrap' }}
+            style={{ padding: '1rem', background: '#f8fafc', borderRadius: '0.5rem', marginBottom: '1.5rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', alignItems: 'flex-end' }}
           >
-            <div style={{ flex: 1, minWidth: '150px' }}>
+            <div>
               <label style={{ fontSize: '0.875rem', marginBottom: '0.25rem', display: 'block' }}>Yazılım Adı</label>
               <input type="text" value={newSoftware} onChange={e => setNewSoftware(e.target.value)} style={{ width: '100%', padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #e2e8f0' }} required />
             </div>
             
-            <div style={{ flex: 1, minWidth: '150px' }}>
+            <div>
+              <label style={{ fontSize: '0.875rem', marginBottom: '0.25rem', display: 'block' }}>Lisans Anahtarı</label>
+              <input type="text" placeholder="Örn: XXXX-XXXX-XXXX-XXXX" value={newLicenseKey} onChange={e => setNewLicenseKey(e.target.value)} style={{ width: '100%', padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #e2e8f0', fontFamily: 'monospace' }} />
+            </div>
+
+            <div>
               <label style={{ fontSize: '0.875rem', marginBottom: '0.25rem', display: 'block' }}>Bayi / Müşteri Seçin</label>
               <select 
                 value={newDealer} 
@@ -132,11 +140,13 @@ function Lisanslar() {
               </select>
             </div>
 
-            <div style={{ flex: 1, minWidth: '150px' }}>
+            <div>
               <label style={{ fontSize: '0.875rem', marginBottom: '0.25rem', display: 'block' }}>Bitiş Tarihi</label>
               <input type="date" value={newExpiry} onChange={e => setNewExpiry(e.target.value)} style={{ width: '100%', padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #e2e8f0' }} required />
             </div>
-            <button type="submit" className="btn-primary" style={{ padding: '0.5rem 1.5rem' }}>Kaydet</button>
+            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+              <button type="submit" className="btn-primary" style={{ padding: '0.5rem 1.5rem', width: '100%' }}>Kaydet</button>
+            </div>
           </motion.form>
         )}
         
@@ -145,6 +155,7 @@ function Lisanslar() {
             <thead>
               <tr style={{ borderBottom: '1px solid #e2e8f0', color: '#64748b', fontSize: '0.875rem' }}>
                 <th style={{ padding: '1rem' }}>Yazılım</th>
+                <th style={{ padding: '1rem' }}>Lisans Anahtarı</th>
                 <th style={{ padding: '1rem' }}>Bayi / Müşteri</th>
                 <th style={{ padding: '1rem' }}>Bitiş Tarihi</th>
                 <th style={{ padding: '1rem' }}>Durum</th>
@@ -152,11 +163,12 @@ function Lisanslar() {
             </thead>
             <tbody>
               {filteredLisanslar.length === 0 ? (
-                <tr><td colSpan={4} style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>Listelenecek lisans bulunamadı.</td></tr>
+                <tr><td colSpan={5} style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>Listelenecek lisans bulunamadı.</td></tr>
               ) : (
                 filteredLisanslar.map((lisans) => (
                   <tr key={lisans.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
                     <td style={{ padding: '1rem', fontWeight: 500, color: '#0f172a' }}>{lisans.software}</td>
+                    <td style={{ padding: '1rem', color: '#64748b', fontFamily: 'monospace' }}>{lisans.licenseKey || '-'}</td>
                     <td style={{ padding: '1rem', color: '#64748b' }}>{lisans.dealer}</td>
                     <td style={{ padding: '1rem', color: '#64748b' }}>{lisans.expiry || '-'}</td>
                     <td style={{ padding: '1rem' }}>

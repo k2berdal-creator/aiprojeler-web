@@ -9,6 +9,10 @@ interface Bayi {
   id: string;
   name: string;
   city: string;
+  address: string;
+  taxOffice: string;
+  taxNumber: string;
+  contact: string;
   status: string;
   clientCount: number;
 }
@@ -16,9 +20,15 @@ interface Bayi {
 function Bayiler() {
   const [bayiler, setBayiler] = useState<Bayi[]>([]);
   const [showAddBayi, setShowAddBayi] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  
+  // Form States
   const [newBayiName, setNewBayiName] = useState('');
   const [newBayiCity, setNewBayiCity] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [newAddress, setNewAddress] = useState('');
+  const [newTaxOffice, setNewTaxOffice] = useState('');
+  const [newTaxNumber, setNewTaxNumber] = useState('');
+  const [newContact, setNewContact] = useState('');
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'bayiler'), (snapshot) => {
@@ -38,6 +48,10 @@ function Bayiler() {
       await addDoc(collection(db, 'bayiler'), {
         name: newBayiName,
         city: newBayiCity,
+        address: newAddress,
+        taxOffice: newTaxOffice,
+        taxNumber: newTaxNumber,
+        contact: newContact,
         status: 'Aktif',
         clientCount: 0,
         createdAt: serverTimestamp()
@@ -45,6 +59,10 @@ function Bayiler() {
       setShowAddBayi(false);
       setNewBayiName('');
       setNewBayiCity('');
+      setNewAddress('');
+      setNewTaxOffice('');
+      setNewTaxNumber('');
+      setNewContact('');
     } catch (error) {
       console.error("Bayi eklenirken hata:", error);
       alert("Bayi eklenirken bir hata oluştu.");
@@ -82,17 +100,35 @@ function Bayiler() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             onSubmit={handleAddBayi}
-            style={{ padding: '1rem', background: '#f8fafc', borderRadius: '0.5rem', marginBottom: '1.5rem', display: 'flex', gap: '1rem', alignItems: 'flex-end', flexWrap: 'wrap' }}
+            style={{ padding: '1rem', background: '#f8fafc', borderRadius: '0.5rem', marginBottom: '1.5rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', alignItems: 'flex-end' }}
           >
-            <div style={{ flex: 1, minWidth: '200px' }}>
-              <label style={{ fontSize: '0.875rem', marginBottom: '0.25rem', display: 'block' }}>Bayi Adı</label>
+            <div>
+              <label style={{ fontSize: '0.875rem', marginBottom: '0.25rem', display: 'block' }}>Bayi / Şirket Adı</label>
               <input type="text" value={newBayiName} onChange={e => setNewBayiName(e.target.value)} style={{ width: '100%', padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #e2e8f0' }} required />
             </div>
-            <div style={{ flex: 1, minWidth: '200px' }}>
+            <div>
               <label style={{ fontSize: '0.875rem', marginBottom: '0.25rem', display: 'block' }}>Şehir</label>
               <input type="text" value={newBayiCity} onChange={e => setNewBayiCity(e.target.value)} style={{ width: '100%', padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #e2e8f0' }} required />
             </div>
-            <button type="submit" className="btn-primary" style={{ padding: '0.5rem 1.5rem' }}>Kaydet</button>
+            <div>
+              <label style={{ fontSize: '0.875rem', marginBottom: '0.25rem', display: 'block' }}>İletişim (Tel/E-posta)</label>
+              <input type="text" value={newContact} onChange={e => setNewContact(e.target.value)} style={{ width: '100%', padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #e2e8f0' }} />
+            </div>
+            <div>
+              <label style={{ fontSize: '0.875rem', marginBottom: '0.25rem', display: 'block' }}>Vergi Dairesi</label>
+              <input type="text" value={newTaxOffice} onChange={e => setNewTaxOffice(e.target.value)} style={{ width: '100%', padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #e2e8f0' }} />
+            </div>
+            <div>
+              <label style={{ fontSize: '0.875rem', marginBottom: '0.25rem', display: 'block' }}>Vergi No</label>
+              <input type="text" value={newTaxNumber} onChange={e => setNewTaxNumber(e.target.value)} style={{ width: '100%', padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #e2e8f0' }} />
+            </div>
+            <div style={{ gridColumn: '1 / -1' }}>
+              <label style={{ fontSize: '0.875rem', marginBottom: '0.25rem', display: 'block' }}>Açık Adres</label>
+              <textarea value={newAddress} onChange={e => setNewAddress(e.target.value)} style={{ width: '100%', padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #e2e8f0', minHeight: '60px' }} />
+            </div>
+            <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'flex-end' }}>
+              <button type="submit" className="btn-primary" style={{ padding: '0.5rem 2rem' }}>Kaydet</button>
+            </div>
           </motion.form>
         )}
         
@@ -102,17 +138,23 @@ function Bayiler() {
               <tr style={{ borderBottom: '1px solid #e2e8f0', color: '#64748b', fontSize: '0.875rem' }}>
                 <th style={{ padding: '1rem' }}>Bayi Adı</th>
                 <th style={{ padding: '1rem' }}>Şehir</th>
+                <th style={{ padding: '1rem' }}>İletişim</th>
+                <th style={{ padding: '1rem' }}>Vergi Dairesi/No</th>
                 <th style={{ padding: '1rem' }}>Durum</th>
               </tr>
             </thead>
             <tbody>
               {filteredBayiler.length === 0 ? (
-                <tr><td colSpan={3} style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>Listelenecek bayi bulunamadı.</td></tr>
+                <tr><td colSpan={5} style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>Listelenecek bayi bulunamadı.</td></tr>
               ) : (
                 filteredBayiler.map((bayi) => (
                   <tr key={bayi.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
                     <td style={{ padding: '1rem', fontWeight: 500, color: '#0f172a' }}>{bayi.name}</td>
                     <td style={{ padding: '1rem', color: '#64748b' }}>{bayi.city}</td>
+                    <td style={{ padding: '1rem', color: '#64748b' }}>{bayi.contact || '-'}</td>
+                    <td style={{ padding: '1rem', color: '#64748b' }}>
+                      {(bayi.taxOffice || bayi.taxNumber) ? `${bayi.taxOffice || '-'} / ${bayi.taxNumber || '-'}` : '-'}
+                    </td>
                     <td style={{ padding: '1rem' }}>
                       <span style={{ 
                         padding: '0.25rem 0.75rem', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 600,
