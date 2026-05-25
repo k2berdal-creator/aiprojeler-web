@@ -56,9 +56,11 @@ function Login() {
   };
 
   return (
-    <div className="bg-blobs-container" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div className="blob blob-1"></div>
-      <div className="blob blob-2"></div>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
+      <div className="bg-blobs-container">
+        <div className="blob blob-1"></div>
+        <div className="blob blob-2"></div>
+      </div>
       
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
