@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { motion } from 'framer-motion';
 import { Bot, Users, Key, LayoutDashboard, LogOut, Menu, X } from 'lucide-react';
 import '../index.css';
 
@@ -22,7 +21,7 @@ function AdminLayout() {
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#f8fafc' }}>
       {/* Sidebar - Desktop */}
-      <aside className="glass-panel" style={{ 
+      <aside className="glass-panel admin-sidebar" style={{ 
         width: '260px', 
         height: '100vh', 
         position: 'sticky', 
@@ -32,8 +31,7 @@ function AdminLayout() {
         borderRadius: 0,
         borderRight: '1px solid var(--glass-border)',
         zIndex: 50,
-        padding: '1.5rem',
-        '@media (max-width: 768px)': { display: 'none' } // Simple CSS-in-JS pseudo replacement handled by standard CSS later if needed
+        padding: '1.5rem'
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '3rem', paddingLeft: '0.5rem' }}>
           <Bot size={28} color="var(--primary-color)" />
