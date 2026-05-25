@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Search, Plus, CheckCircle2, XCircle } from 'lucide-react';
+import { Search, Plus, CheckCircle2, XCircle, Key } from 'lucide-react';
 import { collection, onSnapshot, addDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
 import '../index.css';
@@ -10,7 +10,10 @@ interface Lisans {
   software: string;
   licenseKey: string;
   dealer: string;
-  expiry: string;
+  hwid: string;
+  userLimit: number;
+  price: string;
+  isLifetime: boolean;
   status: string;
 }
 
@@ -27,9 +30,11 @@ function Lisanslar() {
   // Form State
   const [showAddLisans, setShowAddLisans] = useState(false);
   const [newSoftware, setNewSoftware] = useState('');
-  const [newLicenseKey, setNewLicenseKey] = useState('');
   const [newDealer, setNewDealer] = useState('');
-  const [newExpiry, setNewExpiry] = useState('');
+  const [newHWID, setNewHWID] = useState('');
+  const [newUserLimit, setNewUserLimit] = useState('');
+  const [newPrice, setNewPrice] = useState('');
+  const [newLicenseKey, setNewLicenseKey] = useState('');
 
   useEffect(() => {
     const unsubscribeLisanslar = onSnapshot(collection(db, 'lisanslar'), (snapshot) => {
@@ -54,16 +59,30 @@ function Lisanslar() {
     };
   }, []);
 
+  const generateLicenseKey = () => {
+    const randomPart = Math.random().toString(36).substring(2, 6).toUpperCase();
+    const hwidPart = newHWID ? newHWID.replace(/[^a-zA-Z0-9]/g, '').substring(0, 4).toUpperCase() : 'SRVR';
+    const timePart = Date.now().toString(36).substring(4).toUpperCase();
+    
+    setNewLicenseKey(`K2B-${randomPart}-${hwidPart}-${timePart}`);
+  };
+
   const handleAddLisans = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newSoftware || !newDealer || !newExpiry) return;
+    if (!newSoftware || !newDealer || !newLicenseKey || !newHWID) {
+      alert("Lütfen Yazılım, Bayi, HWID ve Lisans Anahtarı alanlarını doldurun.");
+      return;
+    }
     
     try {
       await addDoc(collection(db, 'lisanslar'), {
         software: newSoftware,
         licenseKey: newLicenseKey,
         dealer: newDealer,
-        expiry: newExpiry,
+        hwid: newHWID,
+        userLimit: Number(newUserLimit) || 0,
+        price: newPrice,
+        isLifetime: true,
         status: 'Aktif',
         createdAt: serverTimestamp()
       });
@@ -71,7 +90,9 @@ function Lisanslar() {
       setNewSoftware('');
       setNewLicenseKey('');
       setNewDealer('');
-      setNewExpiry('');
+      setNewHWID('');
+      setNewUserLimit('');
+      setNewPrice('');
     } catch (error) {
       console.error("Lisans eklenirken hata:", error);
       alert("Lisans eklenirken bir hata oluştu.");
@@ -88,7 +109,7 @@ function Lisanslar() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
       <header>
         <h1 style={{ fontSize: '1.875rem', color: '#0f172a', marginBottom: '0.5rem' }}>Lisans Yönetimi</h1>
-        <p style={{ color: '#64748b' }}>Müşterilerinize ait yazılım lisanslarını buradan takip edebilirsiniz.</p>
+        <p style={{ color: '#64748b' }}>Müşterilerinize ait donanıma kilitli ömür boyu yazılım lisanslarını buradan takip edebilirsiniz.</p>
       </header>
 
       <div className="glass-panel" style={{ padding: '1.5rem', background: '#fff', border: '1px solid #e2e8f0', borderRadius: '1rem' }}>
@@ -103,8 +124,8 @@ function Lisanslar() {
               style={{ width: '100%', padding: '0.5rem 1rem 0.5rem 2.5rem', borderRadius: '0.5rem', border: '1px solid #e2e8f0', outline: 'none' }} 
             />
           </div>
-          <button onClick={() => setShowAddLisans(!showAddLisans)} className="btn-primary" style={{ padding: '0.5rem 1rem', display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.875rem' }}>
-            <Plus size={16} /> Yeni Lisans Ekle
+          <button onClick={() => setShowAddLisans(!showAddLisans)} className="btn-primary" style={{ padding: '0.75rem 1.5rem', display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.875rem' }}>
+            <Plus size={16} /> Yeni Lisans Üret
           </button>
         </div>
 
@@ -121,11 +142,6 @@ function Lisanslar() {
             </div>
             
             <div>
-              <label style={{ fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.5rem', display: 'block' }}>Lisans Anahtarı</label>
-              <input type="text" className="form-input" placeholder="Örn: XXXX-XXXX-XXXX-XXXX" value={newLicenseKey} onChange={e => setNewLicenseKey(e.target.value)} style={{ fontFamily: 'monospace' }} />
-            </div>
-
-            <div>
               <label style={{ fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.5rem', display: 'block' }}>Bayi / Müşteri Seçin</label>
               <select 
                 className="form-input"
@@ -141,11 +157,32 @@ function Lisanslar() {
             </div>
 
             <div>
-              <label style={{ fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.5rem', display: 'block' }}>Bitiş Tarihi</label>
-              <input type="date" className="form-input" value={newExpiry} onChange={e => setNewExpiry(e.target.value)} required />
+              <label style={{ fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.5rem', display: 'block' }}>Sunucu Donanım Kimliği (HWID)</label>
+              <input type="text" className="form-input" placeholder="Örn: 5F3B-9A2C-..." value={newHWID} onChange={e => setNewHWID(e.target.value)} style={{ fontFamily: 'monospace' }} required />
             </div>
-            <div style={{ display: 'flex', justifySelf: 'flex-end', marginTop: '0.5rem' }}>
-              <button type="submit" className="btn-primary" style={{ padding: '0.75rem 2.5rem', fontSize: '1rem' }}>Sisteme Kaydet</button>
+
+            <div>
+              <label style={{ fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.5rem', display: 'block' }}>Kullanıcı Limiti</label>
+              <input type="number" className="form-input" placeholder="Örn: 50" value={newUserLimit} onChange={e => setNewUserLimit(e.target.value)} required min="1" />
+            </div>
+
+            <div>
+              <label style={{ fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.5rem', display: 'block' }}>Tutar / Fiyat</label>
+              <input type="text" className="form-input" placeholder="Örn: 15.000 ₺" value={newPrice} onChange={e => setNewPrice(e.target.value)} required />
+            </div>
+
+            <div style={{ gridColumn: '1 / -1' }}>
+              <label style={{ fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.5rem', display: 'block' }}>Lisans Anahtarı</label>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <input type="text" className="form-input" placeholder="Oluştur butonuna basın ->" value={newLicenseKey} onChange={e => setNewLicenseKey(e.target.value)} style={{ fontFamily: 'monospace', fontWeight: 700, color: '#0ea5e9', letterSpacing: '1px' }} required />
+                <button type="button" onClick={generateLicenseKey} className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 1.5rem', whiteSpace: 'nowrap' }}>
+                  <Key size={16} /> Anahtar Üret
+                </button>
+              </div>
+            </div>
+
+            <div style={{ gridColumn: '1 / -1', display: 'flex', justifySelf: 'flex-end', marginTop: '0.5rem' }}>
+              <button type="submit" className="btn-primary" style={{ padding: '0.75rem 2.5rem', fontSize: '1rem' }}>Lisansı Aktifleştir ve Kaydet</button>
             </div>
           </motion.form>
         )}
@@ -154,23 +191,32 @@ function Lisanslar() {
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead>
               <tr style={{ borderBottom: '1px solid #e2e8f0', color: '#64748b', fontSize: '0.875rem' }}>
-                <th style={{ padding: '1rem' }}>Yazılım</th>
+                <th style={{ padding: '1rem' }}>Yazılım & Bayi</th>
                 <th style={{ padding: '1rem' }}>Lisans Anahtarı</th>
-                <th style={{ padding: '1rem' }}>Bayi / Müşteri</th>
-                <th style={{ padding: '1rem' }}>Bitiş Tarihi</th>
+                <th style={{ padding: '1rem' }}>Sınır</th>
+                <th style={{ padding: '1rem' }}>HWID</th>
+                <th style={{ padding: '1rem' }}>Süre</th>
+                <th style={{ padding: '1rem' }}>Tutar</th>
                 <th style={{ padding: '1rem' }}>Durum</th>
               </tr>
             </thead>
             <tbody>
               {filteredLisanslar.length === 0 ? (
-                <tr><td colSpan={5} style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>Listelenecek lisans bulunamadı.</td></tr>
+                <tr><td colSpan={7} style={{ padding: '2rem', textAlign: 'center', color: '#94a3b8' }}>Listelenecek lisans bulunamadı.</td></tr>
               ) : (
                 filteredLisanslar.map((lisans) => (
                   <tr key={lisans.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                    <td style={{ padding: '1rem', fontWeight: 500, color: '#0f172a' }}>{lisans.software}</td>
-                    <td style={{ padding: '1rem', color: '#64748b', fontFamily: 'monospace' }}>{lisans.licenseKey || '-'}</td>
-                    <td style={{ padding: '1rem', color: '#64748b' }}>{lisans.dealer}</td>
-                    <td style={{ padding: '1rem', color: '#64748b' }}>{lisans.expiry || '-'}</td>
+                    <td style={{ padding: '1rem' }}>
+                      <div style={{ fontWeight: 600, color: '#0f172a' }}>{lisans.software}</div>
+                      <div style={{ fontSize: '0.85rem', color: '#64748b' }}>{lisans.dealer}</div>
+                    </td>
+                    <td style={{ padding: '1rem', color: '#0ea5e9', fontFamily: 'monospace', fontWeight: 600, fontSize: '0.9rem' }}>{lisans.licenseKey || '-'}</td>
+                    <td style={{ padding: '1rem', color: '#64748b', fontWeight: 500 }}>{lisans.userLimit ? `${lisans.userLimit} Kullanıcı` : 'Sınırsız'}</td>
+                    <td style={{ padding: '1rem', color: '#64748b', fontFamily: 'monospace', fontSize: '0.85rem' }}>{lisans.hwid || '-'}</td>
+                    <td style={{ padding: '1rem' }}>
+                      <span style={{ padding: '0.25rem 0.5rem', background: '#f1f5f9', color: '#475569', borderRadius: '0.25rem', fontSize: '0.75rem', fontWeight: 600 }}>Ömür Boyu</span>
+                    </td>
+                    <td style={{ padding: '1rem', color: '#16a34a', fontWeight: 600 }}>{lisans.price || '-'}</td>
                     <td style={{ padding: '1rem' }}>
                       <span style={{ 
                         padding: '0.25rem 0.75rem', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.25rem',
