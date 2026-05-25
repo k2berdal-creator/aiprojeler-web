@@ -3,6 +3,8 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import AdminLayout from './pages/AdminLayout';
 import Dashboard from './pages/Dashboard';
+import Bayiler from './pages/Bayiler';
+import Lisanslar from './pages/Lisanslar';
 import ProtectedRoute from './components/ProtectedRoute';
 
 function App() {
@@ -16,8 +18,8 @@ function App() {
         <Route element={<ProtectedRoute />}>
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<Dashboard />} />
-            <Route path="bayiler" element={<Dashboard />} />
-            <Route path="lisanslar" element={<Dashboard />} />
+            <Route path="bayiler" element={<Bayiler />} />
+            <Route path="lisanslar" element={<Lisanslar />} />
           </Route>
         </Route>
       </Routes>
