@@ -12,7 +12,8 @@ interface Bayi {
   address: string;
   taxOffice: string;
   taxNumber: string;
-  contact: string;
+  email: string;
+  phone: string;
   status: string;
   clientCount: number;
 }
@@ -28,7 +29,8 @@ function Bayiler() {
   const [newAddress, setNewAddress] = useState('');
   const [newTaxOffice, setNewTaxOffice] = useState('');
   const [newTaxNumber, setNewTaxNumber] = useState('');
-  const [newContact, setNewContact] = useState('');
+  const [newEmail, setNewEmail] = useState('');
+  const [newPhone, setNewPhone] = useState('');
 
   useEffect(() => {
     const unsubscribe = onSnapshot(collection(db, 'bayiler'), (snapshot) => {
@@ -51,7 +53,8 @@ function Bayiler() {
         address: newAddress,
         taxOffice: newTaxOffice,
         taxNumber: newTaxNumber,
-        contact: newContact,
+        email: newEmail,
+        phone: newPhone,
         status: 'Aktif',
         clientCount: 0,
         createdAt: serverTimestamp()
@@ -62,7 +65,8 @@ function Bayiler() {
       setNewAddress('');
       setNewTaxOffice('');
       setNewTaxNumber('');
-      setNewContact('');
+      setNewEmail('');
+      setNewPhone('');
     } catch (error) {
       console.error("Bayi eklenirken hata:", error);
       alert("Bayi eklenirken bir hata oluştu.");
@@ -90,7 +94,7 @@ function Bayiler() {
               style={{ width: '100%', padding: '0.5rem 1rem 0.5rem 2.5rem', borderRadius: '0.5rem', border: '1px solid #e2e8f0', outline: 'none' }} 
             />
           </div>
-          <button onClick={() => setShowAddBayi(!showAddBayi)} className="btn-primary" style={{ padding: '0.5rem 1rem', display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.875rem' }}>
+          <button onClick={() => setShowAddBayi(!showAddBayi)} className="btn-primary" style={{ padding: '0.75rem 1.5rem', display: 'flex', gap: '0.5rem', alignItems: 'center', fontSize: '0.875rem' }}>
             <Plus size={16} /> Yeni Bayi Ekle
           </button>
         </div>
@@ -100,34 +104,38 @@ function Bayiler() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             onSubmit={handleAddBayi}
-            style={{ padding: '1rem', background: '#f8fafc', borderRadius: '0.5rem', marginBottom: '1.5rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', alignItems: 'flex-end' }}
+            style={{ padding: '1.5rem', background: '#f8fafc', borderRadius: '0.75rem', marginBottom: '1.5rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem', alignItems: 'flex-start', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}
           >
             <div>
-              <label style={{ fontSize: '0.875rem', marginBottom: '0.25rem', display: 'block' }}>Bayi / Şirket Adı</label>
-              <input type="text" value={newBayiName} onChange={e => setNewBayiName(e.target.value)} style={{ width: '100%', padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #e2e8f0' }} required />
+              <label style={{ fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.5rem', display: 'block' }}>Bayi / Şirket Adı</label>
+              <input type="text" className="form-input" value={newBayiName} onChange={e => setNewBayiName(e.target.value)} required />
             </div>
             <div>
-              <label style={{ fontSize: '0.875rem', marginBottom: '0.25rem', display: 'block' }}>Şehir</label>
-              <input type="text" value={newBayiCity} onChange={e => setNewBayiCity(e.target.value)} style={{ width: '100%', padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #e2e8f0' }} required />
+              <label style={{ fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.5rem', display: 'block' }}>Şehir</label>
+              <input type="text" className="form-input" value={newBayiCity} onChange={e => setNewBayiCity(e.target.value)} required />
             </div>
             <div>
-              <label style={{ fontSize: '0.875rem', marginBottom: '0.25rem', display: 'block' }}>İletişim (Tel/E-posta)</label>
-              <input type="text" value={newContact} onChange={e => setNewContact(e.target.value)} style={{ width: '100%', padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #e2e8f0' }} />
+              <label style={{ fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.5rem', display: 'block' }}>E-Posta Adresi</label>
+              <input type="email" className="form-input" value={newEmail} onChange={e => setNewEmail(e.target.value)} placeholder="ornek@sirket.com" />
             </div>
             <div>
-              <label style={{ fontSize: '0.875rem', marginBottom: '0.25rem', display: 'block' }}>Vergi Dairesi</label>
-              <input type="text" value={newTaxOffice} onChange={e => setNewTaxOffice(e.target.value)} style={{ width: '100%', padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #e2e8f0' }} />
+              <label style={{ fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.5rem', display: 'block' }}>Telefon Numarası</label>
+              <input type="tel" className="form-input" value={newPhone} onChange={e => setNewPhone(e.target.value)} placeholder="0555 555 55 55" />
             </div>
             <div>
-              <label style={{ fontSize: '0.875rem', marginBottom: '0.25rem', display: 'block' }}>Vergi No</label>
-              <input type="text" value={newTaxNumber} onChange={e => setNewTaxNumber(e.target.value)} style={{ width: '100%', padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #e2e8f0' }} />
+              <label style={{ fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.5rem', display: 'block' }}>Vergi Dairesi</label>
+              <input type="text" className="form-input" value={newTaxOffice} onChange={e => setNewTaxOffice(e.target.value)} />
+            </div>
+            <div>
+              <label style={{ fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.5rem', display: 'block' }}>Vergi Numarası</label>
+              <input type="text" className="form-input" value={newTaxNumber} onChange={e => setNewTaxNumber(e.target.value)} />
             </div>
             <div style={{ gridColumn: '1 / -1' }}>
-              <label style={{ fontSize: '0.875rem', marginBottom: '0.25rem', display: 'block' }}>Açık Adres</label>
-              <textarea value={newAddress} onChange={e => setNewAddress(e.target.value)} style={{ width: '100%', padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #e2e8f0', minHeight: '60px' }} />
+              <label style={{ fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.5rem', display: 'block' }}>Açık Adres</label>
+              <textarea className="form-input" value={newAddress} onChange={e => setNewAddress(e.target.value)} style={{ minHeight: '80px', resize: 'vertical' }} />
             </div>
-            <div style={{ gridColumn: '1 / -1', display: 'flex', justifyContent: 'flex-end' }}>
-              <button type="submit" className="btn-primary" style={{ padding: '0.5rem 2rem' }}>Kaydet</button>
+            <div style={{ gridColumn: '1 / -1', display: 'flex', justifySelf: 'flex-end', marginTop: '0.5rem' }}>
+              <button type="submit" className="btn-primary" style={{ padding: '0.75rem 2.5rem', fontSize: '1rem' }}>Sisteme Kaydet</button>
             </div>
           </motion.form>
         )}
@@ -138,7 +146,7 @@ function Bayiler() {
               <tr style={{ borderBottom: '1px solid #e2e8f0', color: '#64748b', fontSize: '0.875rem' }}>
                 <th style={{ padding: '1rem' }}>Bayi Adı</th>
                 <th style={{ padding: '1rem' }}>Şehir</th>
-                <th style={{ padding: '1rem' }}>İletişim</th>
+                <th style={{ padding: '1rem' }}>İletişim (Mail / Tel)</th>
                 <th style={{ padding: '1rem' }}>Vergi Dairesi/No</th>
                 <th style={{ padding: '1rem' }}>Durum</th>
               </tr>
@@ -149,11 +157,22 @@ function Bayiler() {
               ) : (
                 filteredBayiler.map((bayi) => (
                   <tr key={bayi.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                    <td style={{ padding: '1rem', fontWeight: 500, color: '#0f172a' }}>{bayi.name}</td>
+                    <td style={{ padding: '1rem', fontWeight: 600, color: '#0f172a' }}>{bayi.name}</td>
                     <td style={{ padding: '1rem', color: '#64748b' }}>{bayi.city}</td>
-                    <td style={{ padding: '1rem', color: '#64748b' }}>{bayi.contact || '-'}</td>
                     <td style={{ padding: '1rem', color: '#64748b' }}>
-                      {(bayi.taxOffice || bayi.taxNumber) ? `${bayi.taxOffice || '-'} / ${bayi.taxNumber || '-'}` : '-'}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                        {bayi.email ? <span style={{fontSize: '0.85rem'}}>{bayi.email}</span> : null}
+                        {bayi.phone ? <span style={{fontSize: '0.85rem', color: '#94a3b8'}}>{bayi.phone}</span> : null}
+                        {!bayi.email && !bayi.phone && '-'}
+                      </div>
+                    </td>
+                    <td style={{ padding: '1rem', color: '#64748b' }}>
+                      {(bayi.taxOffice || bayi.taxNumber) ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                           <span style={{fontSize: '0.85rem'}}>{bayi.taxOffice || '-'}</span>
+                           <span style={{fontSize: '0.85rem', fontFamily: 'monospace', color: '#94a3b8'}}>{bayi.taxNumber || '-'}</span>
+                        </div>
+                      ) : '-'}
                     </td>
                     <td style={{ padding: '1rem' }}>
                       <span style={{ 

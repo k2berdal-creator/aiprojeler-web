@@ -113,24 +113,24 @@ function Lisanslar() {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             onSubmit={handleAddLisans}
-            style={{ padding: '1rem', background: '#f8fafc', borderRadius: '0.5rem', marginBottom: '1.5rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', alignItems: 'flex-end' }}
+            style={{ padding: '1.5rem', background: '#f8fafc', borderRadius: '0.75rem', marginBottom: '1.5rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem', alignItems: 'flex-start', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)' }}
           >
             <div>
-              <label style={{ fontSize: '0.875rem', marginBottom: '0.25rem', display: 'block' }}>Yazılım Adı</label>
-              <input type="text" value={newSoftware} onChange={e => setNewSoftware(e.target.value)} style={{ width: '100%', padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #e2e8f0' }} required />
+              <label style={{ fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.5rem', display: 'block' }}>Yazılım Adı</label>
+              <input type="text" className="form-input" value={newSoftware} onChange={e => setNewSoftware(e.target.value)} required />
             </div>
             
             <div>
-              <label style={{ fontSize: '0.875rem', marginBottom: '0.25rem', display: 'block' }}>Lisans Anahtarı</label>
-              <input type="text" placeholder="Örn: XXXX-XXXX-XXXX-XXXX" value={newLicenseKey} onChange={e => setNewLicenseKey(e.target.value)} style={{ width: '100%', padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #e2e8f0', fontFamily: 'monospace' }} />
+              <label style={{ fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.5rem', display: 'block' }}>Lisans Anahtarı</label>
+              <input type="text" className="form-input" placeholder="Örn: XXXX-XXXX-XXXX-XXXX" value={newLicenseKey} onChange={e => setNewLicenseKey(e.target.value)} style={{ fontFamily: 'monospace' }} />
             </div>
 
             <div>
-              <label style={{ fontSize: '0.875rem', marginBottom: '0.25rem', display: 'block' }}>Bayi / Müşteri Seçin</label>
+              <label style={{ fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.5rem', display: 'block' }}>Bayi / Müşteri Seçin</label>
               <select 
+                className="form-input"
                 value={newDealer} 
                 onChange={e => setNewDealer(e.target.value)} 
-                style={{ width: '100%', padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #e2e8f0', backgroundColor: '#fff' }} 
                 required
               >
                 <option value="" disabled>Lütfen bir bayi seçin</option>
@@ -141,11 +141,11 @@ function Lisanslar() {
             </div>
 
             <div>
-              <label style={{ fontSize: '0.875rem', marginBottom: '0.25rem', display: 'block' }}>Bitiş Tarihi</label>
-              <input type="date" value={newExpiry} onChange={e => setNewExpiry(e.target.value)} style={{ width: '100%', padding: '0.5rem', borderRadius: '0.25rem', border: '1px solid #e2e8f0' }} required />
+              <label style={{ fontSize: '0.875rem', fontWeight: 600, color: '#334155', marginBottom: '0.5rem', display: 'block' }}>Bitiş Tarihi</label>
+              <input type="date" className="form-input" value={newExpiry} onChange={e => setNewExpiry(e.target.value)} required />
             </div>
-            <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <button type="submit" className="btn-primary" style={{ padding: '0.5rem 1.5rem', width: '100%' }}>Kaydet</button>
+            <div style={{ display: 'flex', justifySelf: 'flex-end', marginTop: '0.5rem' }}>
+              <button type="submit" className="btn-primary" style={{ padding: '0.75rem 2.5rem', fontSize: '1rem' }}>Sisteme Kaydet</button>
             </div>
           </motion.form>
         )}
