@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { Bot, ArrowRight, Sparkles, Cpu, Code2, HeadphonesIcon, Mail, Phone, MapPin } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import '../index.css';
 
 function Home() {
@@ -35,7 +36,7 @@ function Home() {
               </ul>
             </nav>
             <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
-              <a href="/login" className="btn-secondary" style={{ textDecoration: 'none', display: 'inline-block' }}>Giriş Yap</a>
+              <Link to="/login" className="btn-secondary" style={{ textDecoration: 'none', display: 'inline-block' }}>Giriş Yap</Link>
               <a href="#iletisim" className="btn-primary" style={{ textDecoration: 'none', display: 'inline-block' }}>İletişime Geç</a>
             </div>
           </motion.div>
