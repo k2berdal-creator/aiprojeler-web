@@ -1,19 +1,36 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Bot, Lock, Mail, ArrowRight } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Bot, Lock, Mail, ArrowRight, ShieldCheck } from 'lucide-react';
 import '../index.css';
 
 function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('admin@aiprojeler.com');
+  const [password, setPassword] = useState('123456');
+  const [step, setStep] = useState<'login' | '2fa'>('login');
+  const [mfaCode, setMfaCode] = useState('');
+  const [error, setError] = useState('');
+  
   const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // For now, simple mock login
     if (email && password) {
+      // Birinci aşama başarılı, 2FA ekranına geç
+      setStep('2fa');
+      setError('');
+    } else {
+      setError('Lütfen e-posta ve şifrenizi girin.');
+    }
+  };
+
+  const handle2FASubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (mfaCode.length === 6) {
+      // 2FA başarılı, admin paneline yönlendir
       navigate('/admin');
+    } else {
+      setError('Lütfen 6 haneli doğrulama kodunu girin.');
     }
   };
 
@@ -31,52 +48,108 @@ function Login() {
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
             <div style={{ background: 'rgba(59, 130, 246, 0.1)', padding: '1rem', borderRadius: '50%' }}>
-              <Bot size={40} color="var(--primary-color)" />
+              {step === 'login' ? <Bot size={40} color="var(--primary-color)" /> : <ShieldCheck size={40} color="var(--secondary-color)" />}
             </div>
           </div>
-          <h1 style={{ fontSize: '1.75rem', marginBottom: '0.5rem' }}>Admin Girişi</h1>
-          <p style={{ color: 'var(--text-muted)' }}>Yönetim paneline erişmek için giriş yapın.</p>
+          <h1 style={{ fontSize: '1.75rem', marginBottom: '0.5rem' }}>
+            {step === 'login' ? 'Admin Girişi' : 'İki Adımlı Doğrulama'}
+          </h1>
+          <p style={{ color: 'var(--text-muted)' }}>
+            {step === 'login' 
+              ? 'Yönetim paneline erişmek için giriş yapın.' 
+              : 'Telefonunuza (veya Authenticator) gelen 6 haneli kodu girin.'}
+          </p>
         </div>
 
-        <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-          <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: 500 }}>E-posta Adresi</label>
-            <div style={{ position: 'relative' }}>
-              <Mail size={18} color="var(--text-muted)" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)' }} />
-              <input 
-                type="email" 
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@aiprojeler.com"
-                style={{ width: '100%', padding: '0.75rem 1rem 0.75rem 2.75rem', borderRadius: '0.75rem', border: '1px solid var(--glass-border)', background: 'rgba(255,255,255,0.5)', outline: 'none' }}
-                required
-              />
-            </div>
+        {error && (
+          <div style={{ padding: '0.75rem', marginBottom: '1rem', background: '#fee2e2', color: '#991b1b', borderRadius: '0.5rem', fontSize: '0.875rem', textAlign: 'center' }}>
+            {error}
           </div>
-          
-          <div>
-            <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: 500 }}>Şifre</label>
-            <div style={{ position: 'relative' }}>
-              <Lock size={18} color="var(--text-muted)" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)' }} />
-              <input 
-                type="password" 
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                style={{ width: '100%', padding: '0.75rem 1rem 0.75rem 2.75rem', borderRadius: '0.75rem', border: '1px solid var(--glass-border)', background: 'rgba(255,255,255,0.5)', outline: 'none' }}
-                required
-              />
-            </div>
-          </div>
+        )}
 
-          <button className="btn-primary" type="submit" style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', marginTop: '1rem' }}>
-            Giriş Yap <ArrowRight size={18} />
-          </button>
-        </form>
+        <AnimatePresence mode="wait">
+          {step === 'login' ? (
+            <motion.form 
+              key="login-form"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              onSubmit={handleLoginSubmit} 
+              style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}
+            >
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: 500 }}>E-posta Adresi</label>
+                <div style={{ position: 'relative' }}>
+                  <Mail size={18} color="var(--text-muted)" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)' }} />
+                  <input 
+                    type="email" 
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="admin@aiprojeler.com"
+                    style={{ width: '100%', padding: '0.75rem 1rem 0.75rem 2.75rem', borderRadius: '0.75rem', border: '1px solid var(--glass-border)', background: 'rgba(255,255,255,0.5)', outline: 'none' }}
+                  />
+                </div>
+              </div>
+              
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: 500 }}>Şifre</label>
+                <div style={{ position: 'relative' }}>
+                  <Lock size={18} color="var(--text-muted)" style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)' }} />
+                  <input 
+                    type="password" 
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="••••••••"
+                    style={{ width: '100%', padding: '0.75rem 1rem 0.75rem 2.75rem', borderRadius: '0.75rem', border: '1px solid var(--glass-border)', background: 'rgba(255,255,255,0.5)', outline: 'none' }}
+                  />
+                </div>
+              </div>
+
+              <button className="btn-primary" type="submit" style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', marginTop: '1rem' }}>
+                Devam Et <ArrowRight size={18} />
+              </button>
+            </motion.form>
+          ) : (
+            <motion.form 
+              key="2fa-form"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              onSubmit={handle2FASubmit} 
+              style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}
+            >
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: 500, textAlign: 'center' }}>2FA / MFA Kodu</label>
+                <input 
+                  type="text" 
+                  value={mfaCode}
+                  onChange={(e) => setMfaCode(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
+                  placeholder="000000"
+                  style={{ width: '100%', padding: '1rem', borderRadius: '0.75rem', border: '1px solid var(--glass-border)', background: 'rgba(255,255,255,0.5)', outline: 'none', textAlign: 'center', fontSize: '1.5rem', letterSpacing: '0.5rem' }}
+                  autoFocus
+                />
+              </div>
+
+              <button className="btn-primary" type="submit" style={{ width: '100%', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem', marginTop: '1rem' }}>
+                Doğrula ve Giriş Yap
+              </button>
+              
+              <button 
+                type="button"
+                onClick={() => setStep('login')}
+                style={{ background: 'none', border: 'none', color: 'var(--text-muted)', fontSize: '0.875rem', cursor: 'pointer', marginTop: '0.5rem' }}
+              >
+                Geri Dön
+              </button>
+            </motion.form>
+          )}
+        </AnimatePresence>
         
-        <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
-          <a href="/" style={{ color: 'var(--text-muted)', fontSize: '0.875rem', textDecoration: 'none' }}>Ana Sayfaya Dön</a>
-        </div>
+        {step === 'login' && (
+          <div style={{ textAlign: 'center', marginTop: '1.5rem' }}>
+            <a href="/" style={{ color: 'var(--text-muted)', fontSize: '0.875rem', textDecoration: 'none' }}>Ana Sayfaya Dön</a>
+          </div>
+        )}
       </motion.div>
     </div>
   );
