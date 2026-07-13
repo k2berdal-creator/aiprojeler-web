@@ -1,20 +1,15 @@
 import { useState } from 'react';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { Bot, Users, Key, LayoutDashboard, LogOut, Menu, X, Camera } from 'lucide-react';
+import { Bot, LogOut, LayoutDashboard, Menu, X } from 'lucide-react';
 import '../index.css';
 
-function AdminLayout() {
+function CustomerLayout() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
   const menuItems = [
-    { path: '/admin', icon: <LayoutDashboard size={20} />, label: 'Dashboard' },
-    { path: '/admin/bayiler', icon: <Users size={20} />, label: 'Bayi & Müşteri' },
-    { path: '/admin/lisanslar', icon: <Key size={20} />, label: 'Lisans Yönetimi' },
-    { path: '/admin/icerik', icon: <LayoutDashboard size={20} />, label: 'Ana Sayfa İçeriği' },
-    { path: '/admin/projeler', icon: <LayoutDashboard size={20} />, label: 'Projeler & Demolar' },
-    { path: '/admin/instagram', icon: <Camera size={20} />, label: 'Instagram Otomasyonu' },
+    { path: '/panel', icon: <LayoutDashboard size={20} />, label: 'Lisanslarım' }
   ];
 
   const handleLogout = () => {
@@ -38,7 +33,7 @@ function AdminLayout() {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '3rem', paddingLeft: '0.5rem' }}>
           <Bot size={28} color="var(--primary-color)" />
-          <span style={{ fontSize: '1.25rem', fontWeight: 700, color: '#1e293b' }}>Admin Panel</span>
+          <span style={{ fontSize: '1.25rem', fontWeight: 700, color: '#1e293b' }}>Müşteri Paneli</span>
         </div>
 
         <nav style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
@@ -92,7 +87,7 @@ function AdminLayout() {
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <Bot size={24} color="var(--primary-color)" />
-            <span style={{ fontWeight: 600 }}>Admin Panel</span>
+            <span style={{ fontWeight: 600 }}>Müşteri Paneli</span>
           </div>
           <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} style={{ background: 'none', border: 'none' }}>
             {isMobileMenuOpen ? <X /> : <Menu />}
@@ -107,4 +102,4 @@ function AdminLayout() {
   );
 }
 
-export default AdminLayout;
+export default CustomerLayout;

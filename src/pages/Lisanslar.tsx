@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Search, Plus, CheckCircle2, XCircle, Key, MonitorSmartphone } from 'lucide-react';
-import { collection, onSnapshot, addDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, onSnapshot, setDoc, doc, updateDoc, serverTimestamp } from 'firebase/firestore';
 import { db } from '../firebase';
 import '../index.css';
 
@@ -80,7 +80,7 @@ function Lisanslar() {
     }
     
     try {
-      await addDoc(collection(db, 'lisanslar'), {
+      await setDoc(doc(db, 'lisanslar', newLicenseKey), {
         software: newSoftware,
         licenseKey: newLicenseKey,
         dealer: newDealer,
@@ -100,6 +100,20 @@ function Lisanslar() {
     } catch (error) {
       console.error("Lisans eklenirken hata:", error);
       alert("Lisans eklenirken bir hata oluştu.");
+    }
+  };
+
+  const handleToggleStatus = async (id: string, currentStatus: string) => {
+    if (window.confirm(`Lisans durumunu "${currentStatus === 'Aktif' ? 'İptal Edildi' : 'Aktif'}" olarak değiştirmek istediğinize emin misiniz?`)) {
+      try {
+        const newStatus = currentStatus === 'Aktif' ? 'İptal Edildi' : 'Aktif';
+        await updateDoc(doc(db, 'lisanslar', id), {
+          status: newStatus
+        });
+      } catch (error) {
+        console.error("Durum güncellenirken hata:", error);
+        alert("Lisans durumu güncellenirken hata oluştu.");
+      }
     }
   };
 
@@ -225,14 +239,19 @@ function Lisanslar() {
                     </td>
                     <td style={{ padding: '1rem', color: '#16a34a', fontWeight: 600 }}>{lisans.price || '-'}</td>
                     <td style={{ padding: '1rem' }}>
-                      <span style={{ 
-                        padding: '0.25rem 0.75rem', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.25rem',
-                        background: lisans.status === 'Aktif' ? '#dcfce7' : '#fee2e2',
-                        color: lisans.status === 'Aktif' ? '#166534' : '#991b1b'
-                      }}>
+                      <button 
+                        onClick={() => handleToggleStatus(lisans.id, lisans.status)}
+                        style={{ 
+                          padding: '0.25rem 0.75rem', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: '0.25rem',
+                          background: lisans.status === 'Aktif' ? '#dcfce7' : '#fee2e2',
+                          color: lisans.status === 'Aktif' ? '#166534' : '#991b1b',
+                          border: 'none', cursor: 'pointer', transition: 'all 0.2s', outline: 'none'
+                        }}
+                        title="Durumu Değiştirmek İçin Tıklayın"
+                      >
                         {lisans.status === 'Aktif' ? <CheckCircle2 size={12} /> : <XCircle size={12} />}
                         {lisans.status}
-                      </span>
+                      </button>
                     </td>
                   </tr>
                 ))
