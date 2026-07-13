@@ -265,19 +265,28 @@ function ProjelerYonetimi() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
           <h1 style={{ fontSize: '1.875rem', color: '#0f172a', marginBottom: '0.5rem' }}>Projeler Yönetimi</h1>
           <p style={{ color: '#64748b' }}>Geliştirdiğiniz projeleri ve demoları buradan yönetebilirsiniz.</p>
         </div>
         {!isEditing && (
-          <button 
-            onClick={() => { setCurrentProject({}); setIsEditing(true); }} 
-            className="btn-primary" 
-            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
-          >
-            <Plus size={20} /> Yeni Proje Ekle
-          </button>
+          <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+            <a 
+              href="/admin/instagram"
+              className="btn-primary" 
+              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#8b5cf6', textDecoration: 'none', color: '#fff' }}
+            >
+              <span style={{ fontSize: '1.25rem' }}>🤖</span> Instagram Otomasyonu
+            </a>
+            <button 
+              onClick={() => { setCurrentProject({}); setIsEditing(true); }} 
+              className="btn-primary" 
+              style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+            >
+              <Plus size={20} /> Yeni Proje Ekle
+            </button>
+          </div>
         )}
       </header>
 
