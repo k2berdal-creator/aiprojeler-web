@@ -11,9 +11,10 @@ import {
   ExternalLink,
   Loader2,
   Calendar,
-  Settings as SettingsIcon
+  Settings as SettingsIcon,
+  Trash2
 } from 'lucide-react';
-import { collection, onSnapshot, query, orderBy, limit, doc, getDoc, setDoc } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy, limit, doc, getDoc, setDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../firebase';
 import '../index.css';
 
@@ -61,6 +62,17 @@ function InstagramYonetimi() {
   const [filter, setFilter] = useState<string>('all');
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   const [savingSettings, setSavingSettings] = useState(false);
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm("Bu içeriği silmek istediğinizden emin misiniz?")) return;
+    try {
+      await deleteDoc(doc(db, 'instagram_content_items', id));
+      setMessage({ text: 'İçerik başarıyla silindi.', type: 'success' });
+    } catch (error) {
+      console.error("Silme hatası:", error);
+      setMessage({ text: 'İçerik silinirken bir hata oluştu.', type: 'error' });
+    }
+  };
 
   useEffect(() => {
     // 1. Load GitHub Settings from Firestore
@@ -553,7 +565,7 @@ function InstagramYonetimi() {
                             disabled={actionLoading === `retry-${item.id}`}
                             onClick={() => handleRetry(item.id)}
                             className="btn-primary" 
-                            style={{ flex: 1, padding: '0.5rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', background: '#dc2626' }}
+                            style={{ flex: 1, padding: '0.5rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', background: '#dc2626', color: '#fff', border: 'none', borderRadius: '0.375rem', cursor: 'pointer' }}
                           >
                             {actionLoading === `retry-${item.id}` ? <Loader2 size={14} className="animate-spin" /> : 'Yeniden Dene'}
                           </button>
@@ -564,11 +576,18 @@ function InstagramYonetimi() {
                             target="_blank" 
                             rel="noreferrer"
                             className="btn-primary" 
-                            style={{ flex: 1, padding: '0.5rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', background: '#1e293b', textDecoration: 'none', color: '#fff' }}
+                            style={{ flex: 1, padding: '0.5rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', background: '#1e293b', textDecoration: 'none', color: '#fff', border: 'none', borderRadius: '0.375rem', cursor: 'pointer' }}
                           >
                             IG'de Aç <ExternalLink size={12} />
                           </a>
                         )}
+                        <button
+                          onClick={() => handleDelete(item.id)}
+                          className="btn-primary"
+                          style={{ flex: 1, padding: '0.5rem', fontSize: '0.8rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem', background: '#ef4444', color: '#fff', border: 'none', borderRadius: '0.375rem', cursor: 'pointer' }}
+                        >
+                          <Trash2 size={12} /> Sil
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -643,3 +662,5 @@ function InstagramYonetimi() {
 }
 
 export default InstagramYonetimi;
+
+console.log('cache_bust_123');
